@@ -810,25 +810,26 @@ oj_dump_cstr(const char *str, size_t cnt, bool is_sym, bool escape1, Out out) {
 	}
 	*out->cur++ = '"'; 
     }
+    {
+	char		buf[256];
+	char		*b = buf;
+	const char	*s = orig;
+	const char	*s_end = s + cnt;
+
+	if (10 < s_end - s) {
+	    s_end = s + 10;
+	}
+	for (; s < s_end; s++) {
+	    b += sprintf(b, " %02x", *s);
+	}
+	*b = '\0';
+	printf("*** dumping string '%s'\n", buf);
+    }
+
     if (JXEsc == out->opts->escape_mode && 0 != (0x80 & *(str - 1))) {
 	uint8_t	c = (uint8_t)*(str - 1);
 	int	i;
 	
-	{
-	    char	buf[256];
-	    char	*b = buf;
-	    const char	*s = orig;
-	    int		cnt2 = cnt;
-
-	    if (10 < cnt2) {
-		cnt2 = 10;
-	    }
-	    for (; s < s + cnt2; s++) {
-		b += sprintf(b, " %02x", *s);
-	    }
-	    *b = '\0';
-	    printf("*** dumping string '%s'\n", buf);
-	}
 	// Last utf-8 characters must be 0x10xxxxxx. The start must be
 	// 0x110xxxxx for 2 characters, 0x1110xxxx for 3, and 0x11110xxx for
 	// 4.
@@ -836,8 +837,12 @@ oj_dump_cstr(const char *str, size_t cnt, bool is_sym, bool escape1, Out out) {
 	    char	buf[1024];
 	    char	*b = buf;
 	    const char	*s = orig;
+	    const char	*s_end = s + cnt;
 
-	    for (; s < s + cnt; s++) {
+	    if (32 < s_end - s) {
+		s_end = s + 32;
+	    }
+	    for (; s < s_end; s++) {
 		b += sprintf(b, " %02x", *s);
 	    }
 	    *b = '\0';
